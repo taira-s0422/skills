@@ -3,8 +3,9 @@
 Skill Security Scanner - Claude Code スキルの安全性を自動検査する
 
 Usage:
-    python3 skill_scanner.py <path>        # ディレクトリまたは .skill/.zip ファイル
-    python3 skill_scanner.py <path> --json  # JSON出力のみ
+    python3 skill_scanner.py <path>            # スキャンのみ
+    python3 skill_scanner.py <path> --json      # JSON出力のみ
+    python3 skill_scanner.py <path> --install   # スキャン → SAFEなら自動インストール
 
 Exit codes:
     0 = SAFE (問題なし)
@@ -16,6 +17,7 @@ import argparse
 import json
 import os
 import re
+import shutil
 import sys
 import tempfile
 import zipfile
@@ -499,6 +501,57 @@ def format_report(result: ScanResult) -> str:
 
 
 # ---------------------------------------------------------------------------
+# インストール機能
+# ---------------------------------------------------------------------------
+
+SKILLS_DIR = Path.home() / ".claude" / "skills"
+
+
+def resolve_skill_source(target: Path) -> tuple[Path, Optional[tempfile.TemporaryDirectory]]:
+    """インストール元のディレクトリパスを返す。ZIPの場合は一時展開する。"""
+    if target.is_file() and target.suffix in {".skill", ".zip"}:
+        tmpdir = tempfile.TemporaryDirectory(prefix="skill_install_")
+        with zipfile.ZipFile(target, "r") as zf:
+            zf.extractall(tmpdir.name)
+        return Path(tmpdir.name), tmpdir
+    return target, None
+
+
+def detect_skill_name(source_dir: Path) -> Optional[str]:
+    """SKILL.md の YAML フロントマターから name を取得する。"""
+    skill_md = source_dir / "SKILL.md"
+    if not skill_md.exists():
+        return None
+    try:
+        content = skill_md.read_text(encoding="utf-8", errors="replace")
+        lines = content.splitlines()
+        if lines and lines[0].strip() == "---":
+            for line in lines[1:]:
+                if line.strip() == "---":
+                    break
+                m = re.match(r'^name:\s*(.+)', line)
+                if m:
+                    return m.group(1).strip().strip('"').strip("'")
+    except OSError:
+        pass
+    # フォールバック: ディレクトリ名を使用
+    return source_dir.name if source_dir.name else None
+
+
+def install_skill(source_dir: Path, skill_name: str) -> Path:
+    """スキルを ~/.claude/skills/ にコピーする。"""
+    dest = SKILLS_DIR / skill_name
+    if dest.exists():
+        shutil.rmtree(dest)
+    shutil.copytree(
+        source_dir,
+        dest,
+        ignore=shutil.ignore_patterns(".DS_Store", "__pycache__", "*.pyc"),
+    )
+    return dest
+
+
+# ---------------------------------------------------------------------------
 # メイン
 # ---------------------------------------------------------------------------
 
@@ -510,6 +563,11 @@ def main():
     )
     parser.add_argument("path", help="スキャン対象のパス（ディレクトリまたは .skill/.zip）")
     parser.add_argument("--json", action="store_true", help="JSON出力のみ")
+    parser.add_argument(
+        "--install",
+        action="store_true",
+        help="スキャン後、SAFEの場合のみ ~/.claude/skills/ にインストール",
+    )
     args = parser.parse_args()
 
     target = Path(args.path).expanduser().resolve()
@@ -532,6 +590,27 @@ def main():
         print(format_report(result))
         # JSON も stderr に出力（Claude解析用）
         print(json.dumps(result.to_dict(), ensure_ascii=False, indent=2), file=sys.stderr)
+
+    # --install モード
+    if args.install:
+        if result.verdict == "SAFE":
+            source_dir, tmpdir_obj = resolve_skill_source(target)
+            try:
+                skill_name = detect_skill_name(source_dir)
+                if not skill_name:
+                    print("エラー: SKILL.md が見つからない、またはスキル名を特定できません", file=sys.stderr)
+                    sys.exit(2)
+                dest = install_skill(source_dir, skill_name)
+                print(f"\n✅ インストール完了: {dest}")
+            finally:
+                if tmpdir_obj:
+                    tmpdir_obj.cleanup()
+        elif result.verdict == "WARNING":
+            print(f"\n⚠️  WARNING検出のためインストールを中断しました。")
+            print(f"   検出内容を確認し、問題なければ手動でコピーしてください。")
+        else:
+            print(f"\n🚨 DANGER検出のためインストールを拒否しました。")
+            print(f"   このスキルのインストールは推奨しません。")
 
     # 終了コード
     if result.verdict == "SAFE":

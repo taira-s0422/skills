@@ -17,10 +17,33 @@ cp -r skill-security-checker ~/.claude/skills/
 
 ## 使い方
 
-Claude Code で以下のように実行:
+### Claude Code から実行
 
 ```
 /skill-security-checker <対象パス>
+```
+
+### セーフインストール（推奨）
+
+スキャンしてSAFEの場合のみ自動インストール:
+
+```bash
+python3 ~/.claude/skills/skill-security-checker/scripts/skill_scanner.py <対象パス> --install
+```
+
+| 判定 | --install の動作 |
+|------|-----------------|
+| SAFE | `~/.claude/skills/` に自動コピー |
+| WARNING | インストール中断。手動確認を促す |
+| DANGER | インストール拒否 |
+
+`~/.claude/skills/` に直接コピーするとClaude Codeが即座にスキルを読み込むため、**必ずスキャンしてからインストールすること**。
+
+### スキャンのみ
+
+```bash
+python3 ~/.claude/skills/skill-security-checker/scripts/skill_scanner.py <対象パス>
+python3 ~/.claude/skills/skill-security-checker/scripts/skill_scanner.py <対象パス> --json
 ```
 
 対象パスには以下を指定可能:
@@ -52,14 +75,6 @@ Claude Code で以下のように実行:
 - 隠れた危険性（コメントアウト、変数名偽装、条件分岐内の不審コード）
 - AI/エージェント特有の脅威（設定改ざん、プロンプト汚染）
 - 社会工学的手口（偽の緊急性、過度な権限要求）
-
-## 判定基準
-
-| 判定 | 意味 |
-|------|------|
-| SAFE | 問題なし。インストール可能 |
-| WARNING | 要確認項目あり。検出内容を確認の上判断 |
-| DANGER | インストール非推奨。具体的な危険箇所を報告 |
 
 ## ライセンス
 
