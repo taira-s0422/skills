@@ -1,29 +1,24 @@
-# OS
-.DS_Store
-Thumbs.db
 
-# Claude Code
+__pycache__
+__pycache__/
 .claude/settings.local.json
-
-# Skill packages (binary)
-*.skill
-*.zip
-
-# Environment
+.DS_Store
 .env
 .env.local
-
-# IDE
-.vscode/
 .idea/
-
-# Node
-node_modules/
-
-# Python
-__pycache__
-*.pyc
-
-# Temp
-*.tmp
+.vscode/
 *-workspace/
+*.pyc
+*.skill
+*.tmp
+*.zip
+# Claude Code
+# Environment
+# IDE
+# Node
+# OS
+# Python
+# Skill packages (binary)
+# Temp
+node_modules/
+Thumbs.db
