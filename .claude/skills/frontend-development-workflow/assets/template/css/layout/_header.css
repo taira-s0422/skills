@@ -1,0 +1,56 @@
+/* ==========================================================================
+   Layout - Header
+   ========================================================================== */
+
+.l-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: var(--header-height);
+  background-color: var(--color-bg);
+  z-index: 100;
+  box-shadow: var(--shadow-sm);
+}
+
+.l-header__inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 100%;
+}
+
+.l-header__logo {
+  font-size: var(--font-size-xl);
+  font-weight: bold;
+  font-family: var(--font-heading);
+}
+
+.l-header__nav {
+  display: flex;
+  gap: var(--space-lg);
+}
+
+@media (max-width: 767px) {
+  .l-header {
+    height: 6rem;
+  }
+
+  .l-header__nav {
+    display: none;
+    position: fixed;
+    top: 6rem;
+    left: 0;
+    width: 100%;
+    height: calc(100vh - 6rem);
+    background-color: var(--color-bg);
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-lg);
+  }
+
+  .l-header__nav.is-open {
+    display: flex;
+  }
+}

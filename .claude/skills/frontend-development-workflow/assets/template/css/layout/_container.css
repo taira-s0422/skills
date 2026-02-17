@@ -1,0 +1,17 @@
+/* ==========================================================================
+   Layout - Container
+   ========================================================================== */
+
+.l-container {
+  width: 90%;
+  max-width: var(--max-width);
+  margin: 0 auto;
+}
+
+.l-container--narrow {
+  max-width: 80rem;
+}
+
+.l-container--wide {
+  max-width: 140rem;
+}

@@ -1,0 +1,49 @@
+/* ==========================================================================
+   Component - Hamburger Menu
+   ========================================================================== */
+
+.c-hamburger {
+  width: 3rem;
+  height: 2rem;
+  position: relative;
+  cursor: pointer;
+  z-index: 101;
+}
+
+.c-hamburger span {
+  display: block;
+  width: 100%;
+  height: 2px;
+  background-color: var(--color-text);
+  position: absolute;
+  left: 0;
+  transition: var(--transition-base);
+}
+
+.c-hamburger span:nth-child(1) {
+  top: 0;
+}
+
+.c-hamburger span:nth-child(2) {
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.c-hamburger span:nth-child(3) {
+  bottom: 0;
+}
+
+/* Open state */
+.c-hamburger.is-open span:nth-child(1) {
+  top: 50%;
+  transform: translateY(-50%) rotate(45deg);
+}
+
+.c-hamburger.is-open span:nth-child(2) {
+  opacity: 0;
+}
+
+.c-hamburger.is-open span:nth-child(3) {
+  bottom: 50%;
+  transform: translateY(50%) rotate(-45deg);
+}

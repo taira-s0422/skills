@@ -1,0 +1,32 @@
+/* ==========================================================================
+   Utility - Display
+   ========================================================================== */
+
+.u-block { display: block; }
+.u-inline-block { display: inline-block; }
+.u-flex { display: flex; }
+.u-grid { display: grid; }
+.u-none { display: none; }
+
+/* Visibility */
+.u-visible { visibility: visible; }
+.u-hidden { visibility: hidden; }
+
+/* Responsive Display */
+.u-sp-only {
+  display: none;
+}
+
+.u-pc-only {
+  display: block;
+}
+
+@media (max-width: 767px) {
+  .u-sp-only {
+    display: block;
+  }
+
+  .u-pc-only {
+    display: none;
+  }
+}
